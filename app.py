@@ -1,44 +1,53 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect
+import sqlite3
 import os
 
 app = Flask(__name__)
-fichier = "taches.txt"
 
-# Charger les tâches
-if os.path.exists(fichier):
-    with open(fichier, "r", encoding="utf-8") as f:
-        taches = [ligne.strip() for ligne in f.readlines()]
-else:
-    taches = []
+# Création base de données
+def init_db():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()
 
-# Page principale
-@app.route("/", methods=["GET", "POST"])
+init_db()
+
+@app.route("/")
 def index():
-    global taches
-    if request.method == "POST":
-        # Ajouter une tâche
-        nouvelle_tache = request.form.get("tache")
-        if nouvelle_tache:
-            taches.append(nouvelle_tache)
-            with open(fichier, "w", encoding="utf-8") as f:
-                for t in taches:
-                    f.write(t + "\n")
-        return redirect(url_for("index"))
-    return render_template("index.html", taches=taches)
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    tasks = cursor.fetchall()
+    conn.close()
+    return render_template("index.html", tasks=tasks)
 
-# Supprimer une tâche
-@app.route("/supprimer/<int:index>")
-def supprimer(index):
-    global taches
-    if 0 <= index < len(taches):
-        taches.pop(index)
-        with open(fichier, "w", encoding="utf-8") as f:
-            for t in taches:
-                f.write(t + "\n")
-    return redirect(url_for("index"))
+@app.route("/add", methods=["POST"])
+def add():
+    task = request.form.get("task")
+    if task:
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO tasks (content) VALUES (?)", (task,))
+        conn.commit()
+        conn.close()
+    return redirect("/")
 
-import os
+@app.route("/delete/<int:id>")
+def delete(id):
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tasks WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect("/")
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Render fournit le port, sinon 5000 pour tests locaux
-    app.run(host="0.0.0.0", port=port, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

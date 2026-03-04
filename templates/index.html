@@ -1,20 +1,65 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Gestionnaire de tâches Web</title>
+    <title>Gestionnaire de tâches</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f8;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin: 20px;
+        }
+        input {
+            padding: 10px;
+            width: 250px;
+        }
+        button {
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: white;
+            margin: 10px auto;
+            padding: 10px;
+            width: 300px;
+            display: flex;
+            justify-content: space-between;
+        }
+        a {
+            color: red;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-    <h1>Gestionnaire de tâches</h1>
-    <form method="POST">
-        <input type="text" name="tache" placeholder="Nouvelle tâche" required>
-        <button type="submit">Ajouter</button>
-    </form>
 
-    <ul>
-        {% for tache in taches %}
-        <li>{{ tache }} <a href="{{ url_for('supprimer', index=loop.index0) }}">Supprimer</a></li>
-        {% endfor %}
-    </ul>
+<h1>📋 Gestionnaire de tâches</h1>
+
+<form action="/add" method="POST">
+    <input type="text" name="task" placeholder="Nouvelle tâche..." required>
+    <button type="submit">Ajouter</button>
+</form>
+
+<ul>
+    {% for task in tasks %}
+        <li>
+            {{ task[1] }}
+            <a href="/delete/{{ task[0] }}">Supprimer</a>
+        </li>
+    {% endfor %}
+</ul>
+
 </body>
 </html>
