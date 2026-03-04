@@ -51,3 +51,22 @@ def delete(id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+import csv
+from flask import Response
+
+@app.route("/export")
+def export_tasks():
+    conn = sqlite3.connect("database.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    tasks = cursor.fetchall()
+    conn.close()
+
+    # Créer un CSV en mémoire
+    def generate():
+        yield "id,content\n"
+        for task in tasks:
+            yield f"{task[0]},{task[1]}\n"
+
+    return Response(generate(), mimetype="text/csv",
+                    headers={"Content-Disposition": "attachment; filename=tasks.csv"})
