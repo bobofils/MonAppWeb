@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestionnaire de tâches Web</title>
+</head>
+<body>
+    <h1>Gestionnaire de tâches</h1>
+    <form method="POST">
+        <input type="text" name="tache" placeholder="Nouvelle tâche" required>
+        <button type="submit">Ajouter</button>
+    </form>
+
+    <ul>
+        {% for tache in taches %}
+        <li>{{ tache }} <a href="{{ url_for('supprimer', index=loop.index0) }}">Supprimer</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
