@@ -57,13 +57,44 @@
 </a>
 
 <ul>
-    {% for task in tasks %}
-        <li>
-            {{ task[1] }}
-            <a href="/delete/{{ task[0] }}" style="color:red;">Supprimer</a>
-        </li>
-    {% endfor %}
-</ul>
+<input type="text" id="search" placeholder="Rechercher une tâche..." onkeyup="searchTask()" style="padding:10px; width:250px;">
 
+    <table border="1" style="margin:auto; background:white;">
+<tr>
+<th>ID</th>
+<th>Tâche</th>
+<th>Action</th>
+</tr>
+
+{% for task in tasks %}
+<tr>
+<td>{{ task[0] }}</td>
+<td>{{ task[1] }}</td>
+<td>
+<a href="/delete/{{ task[0] }}" style="color:red;">Supprimer</a>
+</td>
+</tr>
+{% endfor %}
+
+</table>
+<script>
+function searchTask() {
+  let input = document.getElementById("search");
+  let filter = input.value.toLowerCase();
+  let table = document.querySelector("table");
+  let tr = table.getElementsByTagName("tr");
+
+  for (let i = 1; i < tr.length; i++) {
+    let td = tr[i].getElementsByTagName("td")[1];
+    if (td) {
+      let txtValue = td.textContent || td.innerText;
+      tr[i].style.display = txtValue.toLowerCase().includes(filter) ? "" : "none";
+    }
+  }
+}
+</script>
 </body>
 </html>
+<a href="/export_excel">
+<button style="background:green;">Exporter en Excel</button>
+</a>

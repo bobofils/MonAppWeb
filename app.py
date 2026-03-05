@@ -1,3 +1,16 @@
+import pandas as pd
+
+@app.route("/export_excel")
+def export_excel():
+    conn = sqlite3.connect("database.db")
+    df = pd.read_sql_query("SELECT * FROM tasks", conn)
+    conn.close()
+
+    file_path = "tasks.xlsx"
+    df.to_excel(file_path, index=False)
+
+    return send_file(file_path, as_attachment=True)
+from flask import send_file
 from flask import Flask, render_template, request, redirect
 import sqlite3
 import os
