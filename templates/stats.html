@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Statistiques</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body style="text-align:center; font-family:Arial;">
+
+<h1>📊 Statistiques des tâches</h1>
+
+<canvas id="chart" width="400" height="200"></canvas>
+
+<script>
+
+const data = {
+labels: ["Tâches"],
+datasets: [{
+label: "Nombre de tâches",
+data: [{{ total }}],
+backgroundColor: ["#4CAF50"]
+}]
+};
+
+new Chart(document.getElementById("chart"), {
+type: "bar",
+data: data
+});
+
+</script>
+
+<br><br>
+
+<a href="/">
+<button>Retour</button>
+</a>
+
+</body>
+</html>
