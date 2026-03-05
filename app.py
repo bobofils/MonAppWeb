@@ -1,19 +1,8 @@
-import pandas as pd
-
-@app.route("/export_excel")
-def export_excel():
-    conn = sqlite3.connect("database.db")
-    df = pd.read_sql_query("SELECT * FROM tasks", conn)
-    conn.close()
-
-    file_path = "tasks.xlsx"
-    df.to_excel(file_path, index=False)
-
-    return send_file(file_path, as_attachment=True)
-from flask import send_file
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, send_file, Response
 import sqlite3
 import os
+import pandas as pd
+import csv
 
 app = Flask(__name__)
 
@@ -61,9 +50,7 @@ def delete(id):
     conn.close()
     return redirect("/")
 
-import csv
-from flask import Response
-
+# Export CSV
 @app.route("/export")
 def export_tasks():
     conn = sqlite3.connect("database.db")
@@ -77,9 +64,21 @@ def export_tasks():
         for task in tasks:
             yield f"{task[0]},{task[1]}\n"
 
-    return Response(generate(), mimetype="text/csv",
-                    headers={"Content-Disposition": "attachment; filename=tasks.csv"})
+    return Response(generate(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=tasks.csv"})
 
+# Export Excel
+@app.route("/export_excel")
+def export_excel():
+    conn = sqlite3.connect("database.db")
+    df = pd.read_sql_query("SELECT * FROM tasks", conn)
+    conn.close()
+
+    file = "tasks.xlsx"
+    df.to_excel(file, index=False)
+
+    return send_file(file, as_attachment=True)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
