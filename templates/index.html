@@ -38,7 +38,6 @@
             justify-content: space-between;
         }
         a {
-            color: red;
             text-decoration: none;
         }
     </style>
@@ -52,17 +51,19 @@
     <button type="submit">Ajouter</button>
 </form>
 
+<!-- Bouton export -->
+<a href="/export">
+    <button type="button" style="background:#2196F3;">Exporter en CSV</button>
+</a>
+
 <ul>
     {% for task in tasks %}
         <li>
             {{ task[1] }}
-            <a href="/delete/{{ task[0] }}">Supprimer</a>
+            <a href="/delete/{{ task[0] }}" style="color:red;">Supprimer</a>
         </li>
     {% endfor %}
 </ul>
 
 </body>
 </html>
-<a href="/export">
-    <button type="button" style="background: #2196F3;">Exporter en CSV</button>
-</a>

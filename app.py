@@ -48,9 +48,6 @@ def delete(id):
     conn.close()
     return redirect("/")
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
 import csv
 from flask import Response
 
@@ -62,7 +59,6 @@ def export_tasks():
     tasks = cursor.fetchall()
     conn.close()
 
-    # Créer un CSV en mémoire
     def generate():
         yield "id,content\n"
         for task in tasks:
@@ -70,3 +66,8 @@ def export_tasks():
 
     return Response(generate(), mimetype="text/csv",
                     headers={"Content-Disposition": "attachment; filename=tasks.csv"})
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
