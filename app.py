@@ -30,8 +30,9 @@ def init_db():
     conn.commit()
     conn.close()
 
-# on initialise la base
-init_db()
+# on initialise la base uniquement si elle n'existe pas
+if not os.path.exists("database.db"):
+    init_db()
 
 
 # PAGE PRINCIPALE
