@@ -120,23 +120,31 @@ def stats():
 # INSCRIPTION
 @app.route("/register", methods=["GET","POST"])
 def register():
+
     if request.method == "POST":
+
         username = request.form["username"]
         password = request.form["password"]
 
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO users (username,password) VALUES (?,?)",
-            (username,password)
-        )
-        conn.commit()
+
+        try:
+            cursor.execute(
+                "INSERT INTO users (username,password) VALUES (?,?)",
+                (username,password)
+            )
+            conn.commit()
+
+        except sqlite3.IntegrityError:
+            conn.close()
+            return "⚠️ Ce nom d'utilisateur existe déjà"
+
         conn.close()
 
         return redirect("/login")
 
     return render_template("register.html")
-
 
 # LOGIN
 @app.route("/login", methods=["GET","POST"])
