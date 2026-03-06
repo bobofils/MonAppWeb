@@ -5,7 +5,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-# Création base de données
+# --- Création base de données ---
 def init_db():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
@@ -30,12 +30,11 @@ def init_db():
     conn.commit()
     conn.close()
 
-# on initialise la base uniquement si elle n'existe pas
+# --- Initialisation seulement si la base n'existe pas ---
 if not os.path.exists("database.db"):
     init_db()
 
-
-# PAGE PRINCIPALE
+# --- PAGE PRINCIPALE ---
 @app.route("/")
 def index():
     conn = sqlite3.connect("database.db")
@@ -45,8 +44,7 @@ def index():
     conn.close()
     return render_template("index.html", tasks=tasks)
 
-
-# AJOUTER TACHE
+# --- AJOUTER UNE TÂCHE ---
 @app.route("/add", methods=["POST"])
 def add():
     task = request.form.get("task")
@@ -58,8 +56,7 @@ def add():
         conn.close()
     return redirect("/")
 
-
-# SUPPRIMER TACHE
+# --- SUPPRIMER UNE TÂCHE ---
 @app.route("/delete/<int:id>")
 def delete(id):
     conn = sqlite3.connect("database.db")
@@ -69,8 +66,7 @@ def delete(id):
     conn.close()
     return redirect("/")
 
-
-# EXPORT CSV
+# --- EXPORT CSV ---
 @app.route("/export")
 def export_tasks():
     conn = sqlite3.connect("database.db")
@@ -90,8 +86,7 @@ def export_tasks():
         headers={"Content-Disposition": "attachment; filename=tasks.csv"}
     )
 
-
-# EXPORT EXCEL
+# --- EXPORT EXCEL ---
 @app.route("/export_excel")
 def export_excel():
     conn = sqlite3.connect("database.db")
@@ -103,27 +98,20 @@ def export_excel():
 
     return send_file(file, as_attachment=True)
 
-
-# STATISTIQUES
+# --- STATISTIQUES ---
 @app.route("/stats")
 def stats():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
-
     cursor.execute("SELECT COUNT(*) FROM tasks")
     total = cursor.fetchone()[0]
-
     conn.close()
-
     return render_template("stats.html", total=total)
 
-
-# INSCRIPTION
+# --- INSCRIPTION ---
 @app.route("/register", methods=["GET","POST"])
 def register():
-
     if request.method == "POST":
-
         username = request.form["username"]
         password = request.form["password"]
 
@@ -136,34 +124,28 @@ def register():
                 (username,password)
             )
             conn.commit()
-
         except sqlite3.IntegrityError:
             conn.close()
             return "⚠️ Ce nom d'utilisateur existe déjà"
 
         conn.close()
-
         return redirect("/login")
 
     return render_template("register.html")
 
-# LOGIN
+# --- LOGIN ---
 @app.route("/login", methods=["GET","POST"])
 def login():
-
     if request.method == "POST":
-
         username = request.form["username"]
         password = request.form["password"]
 
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-
         cursor.execute(
             "SELECT * FROM users WHERE username=? AND password=?",
             (username,password)
         )
-
         user = cursor.fetchone()
         conn.close()
 
@@ -174,7 +156,7 @@ def login():
 
     return render_template("login.html")
 
-
+# --- LANCEMENT DU SERVEUR ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
