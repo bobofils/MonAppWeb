@@ -2,23 +2,10 @@ from flask import Flask, render_template, request, redirect, send_file, Response
 import sqlite3
 import os
 import pandas as pd
-import csv
 
 app = Flask(__name__)
 
 # Création base de données
-def init_db():
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            content TEXT NOT NULL
-        )
-    """)
-    conn.commit()
-    conn.close()
-
 def init_db():
     conn = sqlite3.connect("database.db")
     cursor = conn.cursor()
@@ -42,44 +29,12 @@ def init_db():
 
     conn.commit()
     conn.close()
-@app.route("/register", methods=["GET","POST"])
-def register():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
 
-        conn = sqlite3.connect("database.db")
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO users (username,password) VALUES (?,?)",(username,password))
-        conn.commit()
-        conn.close()
+# on initialise la base
+init_db()
 
-        return redirect("/login")
 
-    return render_template("register.html")
-@app.route("/login", methods=["GET","POST"])
-def login():
-
-    if request.method == "POST":
-
-        username = request.form["username"]
-        password = request.form["password"]
-
-        conn = sqlite3.connect("database.db")
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT * FROM users WHERE username=? AND password=?",(username,password))
-        user = cursor.fetchone()
-
-        conn.close()
-
-        if user:
-            return redirect("/")
-        else:
-            return "Utilisateur incorrect"
-
-    return render_template("login.html")
-
+# PAGE PRINCIPALE
 @app.route("/")
 def index():
     conn = sqlite3.connect("database.db")
@@ -89,6 +44,8 @@ def index():
     conn.close()
     return render_template("index.html", tasks=tasks)
 
+
+# AJOUTER TACHE
 @app.route("/add", methods=["POST"])
 def add():
     task = request.form.get("task")
@@ -100,6 +57,8 @@ def add():
         conn.close()
     return redirect("/")
 
+
+# SUPPRIMER TACHE
 @app.route("/delete/<int:id>")
 def delete(id):
     conn = sqlite3.connect("database.db")
@@ -109,7 +68,8 @@ def delete(id):
     conn.close()
     return redirect("/")
 
-# Export CSV
+
+# EXPORT CSV
 @app.route("/export")
 def export_tasks():
     conn = sqlite3.connect("database.db")
@@ -123,11 +83,14 @@ def export_tasks():
         for task in tasks:
             yield f"{task[0]},{task[1]}\n"
 
-    return Response(generate(),
+    return Response(
+        generate(),
         mimetype="text/csv",
-        headers={"Content-Disposition": "attachment; filename=tasks.csv"})
+        headers={"Content-Disposition": "attachment; filename=tasks.csv"}
+    )
 
-# Export Excel
+
+# EXPORT EXCEL
 @app.route("/export_excel")
 def export_excel():
     conn = sqlite3.connect("database.db")
@@ -139,9 +102,8 @@ def export_excel():
 
     return send_file(file, as_attachment=True)
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+
+# STATISTIQUES
 @app.route("/stats")
 def stats():
     conn = sqlite3.connect("database.db")
@@ -153,3 +115,57 @@ def stats():
     conn.close()
 
     return render_template("stats.html", total=total)
+
+
+# INSCRIPTION
+@app.route("/register", methods=["GET","POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO users (username,password) VALUES (?,?)",
+            (username,password)
+        )
+        conn.commit()
+        conn.close()
+
+        return redirect("/login")
+
+    return render_template("register.html")
+
+
+# LOGIN
+@app.route("/login", methods=["GET","POST"])
+def login():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "SELECT * FROM users WHERE username=? AND password=?",
+            (username,password)
+        )
+
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            return redirect("/")
+        else:
+            return "Utilisateur incorrect"
+
+    return render_template("login.html")
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
